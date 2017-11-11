@@ -9,27 +9,66 @@ import binascii
 
 
 def main(keyFile, inFile, outFile):
+    ###########################################
+    #Read key info from file#
+    
     f = open(keyFile, 'r')
-    nSize = string.rstrip(f.readline(), "\n")
-    print nSize
-#    nSize = binascii.unhexlify(nSize)
-#    print nSize
+
+    nBits = string.rstrip(f.readline(), "\n")
+    nBits = int(nBits)
+    
     n = string.rstrip(f.readline(), "\n")
-    print n
-#    n = binascii.unhexlify(n)
-#    print n
+    n = int(n)
+    
     e = string.rstrip(f.readline(), "\n")
-    print e
-#    e = binascii.unhexlify(e)
-#    print e
+    e = int(e)
+    
     f.close()
 
-    r = random.getrandbits(int(nSize)/2)
-    for i in range(r):
-        if i == "0":
-            r = random.getrandbits(int(nSize)/2)
+    ###########################################
+    #Generate randomness#
 
+    r = random.getrandbits(int(nBits/2))
+    r = bytes(r)
+    while 1:
+        if r.find(b'0') != -1:
+            r = random.getrandbits(int(nBits/2))
+            r = bytes(r)
+        else:
+            break
     print r
+    
+    rand = b"0" + b"2" + r + b"0"
+    print rand
+
+    ###########################################
+    #Read message from file#
+    
+    f = open(inFile, 'r')
+    m = string.rstrip(f.readline(), "\n")
+    f.close()
+    print m
+
+    ###########################################
+    #Concat and encrypt#
+    
+    enc = rand + bytes(m)
+    enc = int(enc)
+    print enc
+
+    print "enc bit length = " + str(enc.bit_length()) + "\n" 
+
+    final = pow(enc, e, n)
+    print final
+
+    ###########################################
+    #Write result to file#
+    
+    f = open(outFile, 'w')
+    f.write(str(final))
+    f.close()
+
+    ###########################################
 
 
 if __name__ == "__main__":
